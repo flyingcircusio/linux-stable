@@ -255,6 +255,7 @@ struct stripe_head {
 	int	nr_pages;	/* page array size */
 	int	stripes_per_page;
 #endif
+	atomic_t bitmap_counts;
 	struct r5dev {
 		/* rreq and rvec are used for the replacement device when
 		 * writing data to both devices.
