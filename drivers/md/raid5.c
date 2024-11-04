@@ -4040,6 +4040,7 @@ static void handle_stripe_clean_event(struct r5conf *conf,
 			     test_bit(R5_SkipCopy, &dev->flags))) {
 				/* We can return any write requests */
 				struct bio *wbi, *wbi2;
+				bool written;
 				pr_debug("Return write for disc %d\n", i);
 				if (test_and_clear_bit(R5_Discard, &dev->flags))
 					clear_bit(R5_UPTODATE, &dev->flags);
@@ -4049,9 +4050,12 @@ static void handle_stripe_clean_event(struct r5conf *conf,
 				do_endio = true;
 
 returnbi:
+				written = false;
 				dev->page = dev->orig_page;
 				wbi = dev->written;
 				dev->written = NULL;
+				if (wbi)
+					written = true;
 				while (wbi && wbi->bi_iter.bi_sector <
 					dev->sector + RAID5_STRIPE_SECTORS(conf)) {
 					wbi2 = r5_next_bio(conf, wbi, dev->sector);
@@ -4059,7 +4063,8 @@ returnbi:
 					bio_endio(wbi);
 					wbi = wbi2;
 				}
-				md_bitmap_endwrite(conf->mddev->bitmap, sh->sector,
+				if (written)
+					md_bitmap_endwrite(conf->mddev->bitmap, sh->sector,
 						   RAID5_STRIPE_SECTORS(conf),
 						   !test_bit(STRIPE_DEGRADED, &sh->state),
 						   0);
