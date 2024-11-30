@@ -399,6 +399,9 @@ enum {
 				 * in conf->r5c_full_stripe_list)
 				 */
 	STRIPE_R5C_PREFLUSH,	/* need to flush journal device */
+	STRIPE_BITMAP_CLAIM,	/* Has a claim on the bitmap which will need to
+				 * be released
+				 */
 };
 
 #define STRIPE_EXPAND_SYNC_FLAGS \
